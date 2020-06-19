@@ -9,29 +9,37 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.claustre.dimitri.netapp.Models.GithubUser;
 import com.claustre.dimitri.netapp.R;
+import com.claustre.dimitri.netapp.Utils.GithubCalls;
+
+import java.util.List;
 
 import Utils.NetworkAsyncTask;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-//import butterknife.BindView;
-//import butterknife.ButterKnife;
-//import butterknife.OnClick;
+//deprecated import butterknife.BindView;
+//deprecated import butterknife.ButterKnife;
+//deprecated import butterknife.OnClick;
 
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MainFragment extends Fragment implements View.OnClickListener, NetworkAsyncTask.Listeners {
+public class MainFragment extends Fragment implements View.OnClickListener, NetworkAsyncTask.Listeners, GithubCalls.Callbacks {
+
+    // 1 - Implement Callbacks GithubCalls.Callbacks
+
 
     // FOR DESIGN
-    //@BindView(R.id.fragment_main_textview)
+    //deprecated @BindView(R.id.fragment_main_textview)
 
     private OnButtonClickedListener mCallback;
     private Button mButton;
     private TextView mTextView;
+
 
     public MainFragment() {
     }
@@ -39,7 +47,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, Netw
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        //ButterKnife.bind(this, view);
+        //deprecated ButterKnife.bind(this, view);
         return view;
     }
 
@@ -59,11 +67,13 @@ public class MainFragment extends Fragment implements View.OnClickListener, Netw
     // ACTIONS
     // -----------------
 
-    //@OnClick(R.id.fragment_main_button)
+    //deprecated @OnClick(R.id.fragment_main_button)
 
     public void submit(View view) {
-        executeHttpRequest();
+        // executeHttpRequest();
+        executeHttpRequestWithRetrofit();
     }
+
 
     public interface OnButtonClickedListener {
         void onButtonClicked(View view);
@@ -97,7 +107,32 @@ public class MainFragment extends Fragment implements View.OnClickListener, Netw
 
     @Override
     public void onPostExecute(String json) {
-        this.updateUIWhenStoppingHTTPResquest(json);
+        this.updateUIWhenStopingHTTPRequest(json);
+    }
+
+
+    // -----------------
+    // HTTP REQUEST (Retrofit Way)
+    // -----------------
+
+    // 2 - Override callback methods
+
+    @Override
+    public void onResponse(@Nullable List<GithubUser> users) {
+        // 2.1 - When getting response, we update UI
+        if (users != null) this.updateUIWithListOfUsers(users);
+    }
+
+    @Override
+    public void onFailure() {
+        // 2.2 - When getting error, we update UI
+        this.updateUIWhenStopingHTTPRequest("An error happened !");
+    }
+
+    // 4 - Execute HTTP request and update UI
+    private void executeHttpRequestWithRetrofit() {
+        this.updateUIWhenStartingHTTPRequest();
+        GithubCalls.fetchUserFollowing(this, "JakeWharton");
     }
 
 
@@ -109,7 +144,17 @@ public class MainFragment extends Fragment implements View.OnClickListener, Netw
         this.mTextView.setText("Downloading...");
     }
 
-    private void updateUIWhenStoppingHTTPResquest(String response) {
+    private void updateUIWhenStopingHTTPRequest(String response) {
         this.mTextView.setText(response);
     }
+
+    // 3 - Update UI showing only name of users
+    private void updateUIWithListOfUsers(List<GithubUser> users) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (GithubUser user : users) {
+            stringBuilder.append("-" + user.getLogin() + "\n");
+        }
+        updateUIWhenStopingHTTPRequest(stringBuilder.toString());
+    }
+
 }
