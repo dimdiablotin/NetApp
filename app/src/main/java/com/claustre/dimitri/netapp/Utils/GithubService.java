@@ -5,7 +5,6 @@ import com.claustre.dimitri.netapp.Models.GithubUser;
 import java.util.List;
 
 import io.reactivex.rxjava3.core.Observable;
-//import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -18,7 +17,7 @@ import retrofit2.http.Path;
 public interface GithubService {
     @GET("users/{username}/following")
     Observable<List<GithubUser>> getFollowing(@Path("username") String username);
-    //Call<List<GithubUser>> getFollowing(@Path("username") String username);
+
 
     public static final Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("https://api.github.com/")
