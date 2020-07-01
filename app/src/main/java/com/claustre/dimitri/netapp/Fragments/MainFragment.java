@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.claustre.dimitri.netapp.Models.GithubUser;
+import com.claustre.dimitri.netapp.Models.GithubUserInfo;
 import com.claustre.dimitri.netapp.R;
 import com.claustre.dimitri.netapp.Utils.GithubStreams;
 
@@ -70,8 +71,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         //executeHttpRequestWithRetrofit();
         //streamShowString();
 
-        // 2 - Call the Stream
-        executeHttpRequestWithRetrofit();
+        // Call the Stream
+        //executeHttpRequestWithRetrofit();
+        executeSecondHttpRequestWithRetrofit();
     }
 
 
@@ -91,22 +93,45 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     // HTTP (RxJAVA)
     // -----------------
 
-    // 1 - Execute our Stream
+    // Execute our Stream
     private void executeHttpRequestWithRetrofit() {
-        // 1.1 - Update UI
+        // Update UI
         this.updateUIWhenStartingHTTPRequest();
-        // 1.2 - Excecute the stream suscribing to Observable defined inside GithubStream
+        // Excecute the stream suscribing to Observable defined inside GithubStream
         this.disposable = GithubStreams.streamFetchUserFollowing("JakeWharton").subscribeWith(new DisposableObserver<List<GithubUser>>() {
             @Override
             public void onNext(@io.reactivex.rxjava3.annotations.NonNull List<GithubUser> githubUsers) {
                 Log.e("TAG", "On Next");
-                // 1.3 - Update UI with list of users
+                // Update UI with list of users
                 updateUIWithListOfUsers(githubUsers);
             }
 
             @Override
             public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
                 Log.e("TAG", "On Error" + Log.getStackTraceString(e));
+            }
+
+            @Override
+            public void onComplete() {
+                Log.e("TAG", "On Complete !!");
+            }
+        });
+    }
+
+
+    private void executeSecondHttpRequestWithRetrofit() {
+        this.updateUIWhenStartingHTTPRequest();
+        this.disposable = GithubStreams.streamFetchUserFollowingAndFetchFirstUserInfos("JakeWharton").subscribeWith(new DisposableObserver<GithubUserInfo>() {
+            @Override
+            public void onNext(@io.reactivex.rxjava3.annotations.NonNull GithubUserInfo githubUserInfo) {
+                Log.e("TAG", "On Next");
+                updateUIWithUserInfo(githubUserInfo);
+            }
+
+            @Override
+            public void onError(@io.reactivex.rxjava3.annotations.NonNull Throwable e) {
+                Log.e("TAG", "On Error" + Log.getStackTraceString(e));
+
             }
 
             @Override
@@ -126,6 +151,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     // -----------------
     // UPDATE UI
     // -----------------
+
+    private void updateUIWithUserInfo(GithubUserInfo userInfo) {
+        updateUIWhenStopingHTTPRequest("The first Following of Jake Wharton is " + userInfo.getName() + " with " + userInfo.getFollowers() + " followers.");
+    }
 
     private void updateUIWhenStartingHTTPRequest() {
         this.mTextView.setText("Downloading...");

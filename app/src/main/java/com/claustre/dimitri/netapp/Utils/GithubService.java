@@ -1,6 +1,7 @@
 package com.claustre.dimitri.netapp.Utils;
 
 import com.claustre.dimitri.netapp.Models.GithubUser;
+import com.claustre.dimitri.netapp.Models.GithubUserInfo;
 
 import java.util.List;
 
@@ -15,9 +16,12 @@ import retrofit2.http.Path;
  * Created by dimeli on 19/06/2020.
  */
 public interface GithubService {
+
     @GET("users/{username}/following")
     Observable<List<GithubUser>> getFollowing(@Path("username") String username);
 
+    @GET("users/{username}")
+    Observable<GithubUserInfo> getUserInfos(@Path("username") String username);
 
     public static final Retrofit retrofit = new Retrofit.Builder()
             .baseUrl("https://api.github.com/")
